@@ -7,15 +7,15 @@ const initApp = async () => {
   const io = getSocket(server);
 
   connection(io, () => {
-    console.log('Some corno connected');
+    console.log('Some user connected');
   });
 
   join(io, (payload: any) => {
-    console.log('Some corno joined: ', payload.room, payload.from);
+    console.log('Some user joined: ', payload.room, payload.from);
   });
 
   send(io, (payload: any) => {
-    console.log('Save corno conversarion data on rabbit: ', payload);
+    console.log('Save user conversarion data on rabbit: ', payload);
   });
 }
 
