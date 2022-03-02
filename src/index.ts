@@ -1,22 +1,30 @@
-import { connection, initServer, getSocket, join, send } from 'mercurius-chat';
+import { config, listenRabbitTopic, publishRabbitMessage, listenWebsocket, Socket } from "mercurius-chat";
 
 const initApp = async () => {
-
-  const server = await initServer(3001);
-
-  const io = getSocket(server);
-
-  connection(io, () => {
-    console.log('Some user connected');
+  config({
+    port: 3001,
+    sentryKey: "",
+    rabbitParams: {
+      dsn: "amqp://aquzikoa:8fKSvFoTLXwXj93KHNGBwn4YDoMEY1z9@small-ant.rmq.cloudamqp.com:5672/jobzz",
+      exchange: "eduzz",
+      exchangeType: "topic",
+      connectionName: "jobzz-service-chat",
+    },
   });
 
-  join(io, (payload: any) => {
-    console.log('Some user joined: ', payload.room, payload.from);
-  });
+  listenRabbitTopic({
+      queue: "jobzz.chat.service",
+      topic: "jobzz.chat.service",
+    }, (msg: any) => {
+      console.log('Persist data: ', msg);
+    }
+  );
 
-  send(io, (payload: any) => {
-    console.log('Save user conversarion data on rabbit: ', payload);
+  listenWebsocket('send', (socket: Socket, payload: any) => {
+    socket.emit('receive', payload);
+
+    publishRabbitMessage('jobzz.chat.service', payload);
   });
-}
+};
 
 initApp();
