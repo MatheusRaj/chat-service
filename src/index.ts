@@ -1,4 +1,5 @@
-import { config, listenRabbitTopic, publishRabbitMessage, listenWebsocket, Socket } from "mercurius-chat";
+import { config, listenWebsocket, Socket } from "mercurius-chat";
+import { listenRabbitTopic, publishRabbitMessage } from "mercurius-chat/dist/rabbit";
 
 const initApp = async () => {
   await config({
@@ -16,12 +17,18 @@ const initApp = async () => {
       queue: "jobzz.chat.service",
       topic: "jobzz.chat.service",
     }, (msg: any) => {
-      console.log('Persist data: ', msg);
+      console.log('Persist this: ', msg);
     }
   );
 
+  listenWebsocket('join', (socket: Socket, payload: any) => {
+    console.log('emitting: join');
+    socket.join(payload.room);
+  });
+
   listenWebsocket('send', (socket: Socket, payload: any) => {
-    socket.emit('receive', payload);
+    console.log('emitting: send');
+    socket.to(payload.room).emit('receive', payload);
 
     publishRabbitMessage('jobzz.chat.service', payload);
   });
