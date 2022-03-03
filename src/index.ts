@@ -6,7 +6,7 @@ const initApp = async () => {
     port: 3001,
     sentryKey: "",
     rabbitParams: {
-      dsn: "amqp://aquzikoa:8fKSvFoTLXwXj93KHNGBwn4YDoMEY1z9@small-ant.rmq.cloudamqp.com:5672/jobzz",
+      dsn: "",
       exchange: "eduzz",
       exchangeType: "topic",
       connectionName: "jobzz-service-chat",
