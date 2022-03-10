@@ -15,14 +15,14 @@ const initApp = async () => {
     port: 3001,
     sentryKey: "",
     rabbitParams: {
-      dsn: "amqp://aquzikoa:8fKSvFoTLXwXj93KHNGBwn4YDoMEY1z9@small-ant.rmq.cloudamqp.com:5672/jobzz",
+      dsn: "",
       exchange: "eduzz",
       exchangeType: "topic",
       connectionName: "jobzz.chat.service",
     },
     mongoParams: {
       mongoDatabase: "jobzz-chat",
-      mongoUrl: "mongodb+srv://matheus:0388Dac4.@cluster0.yhcjh.mongodb.net/jobzz-chat"
+      mongoUrl: ""
     }
   });
 
