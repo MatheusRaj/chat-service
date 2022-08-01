@@ -8,8 +8,6 @@ export const dataPersister = () => {
         queue: "mercurius.data.persister",
         topic: "mercurius.data.persister",
       }, async (payload: IConversation) => {
-        console.log('PERSISTING THIS: ', payload);
-  
         const application = await ApplicationModel.findOne({ token: payload.token });
   
         if (!application?.endpoint) {
