@@ -9,16 +9,16 @@ const initApp = async () => {
     port: 3001,
     sentryKey: "",
     rabbitParams: {
-      dsn: "amqp://guest:guest@localhost:5672",
+      dsn: "",
       exchange: "eduzz",
       exchangeType: "topic",
       connectionName: "mercurius.data.persister",
     },
     mongoParams: {
       mongoDatabase: "Mercurius",
-      mongoUrl: "mongodb://root:root@localhost:27017/"
+      mongoUrl: ""
     },
-    redisUrl: 'redis://localhost:6379'
+    redisUrl: ""
   });
 
   const io = getIoConnection();

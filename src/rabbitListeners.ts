@@ -11,7 +11,7 @@ export const dataPersister = () => {
         const application = await ApplicationModel.findOne({ token: payload.token });
   
         if (!application?.endpoint) {
-          return;
+          return false;
         }
   
         axios.post(application.endpoint, payload)
@@ -21,8 +21,6 @@ export const dataPersister = () => {
         .catch(function (error) {
           console.log(error);
         });
-  
-        return true;
       }
     );
 }
