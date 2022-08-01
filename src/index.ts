@@ -1,58 +1,53 @@
-import { config, listenWebsocket, Socket } from "mercurius-chat";
-import { listenRabbitTopic, publishRabbitMessage } from "mercurius-chat/dist/rabbit";
-import { persistMessage, listMessages, model, Schema } from "mercurius-chat/dist/mongo";
-
-interface IConversation {
-  room: string;
-  message: {
-    from: string;
-    content: string;
-  }
-}
+import { config, listenWebsocket, Socket, getIoConnection } from "mercurius-chat";
+import { publishRabbitMessage } from "mercurius-chat/dist/rabbit";
+import { IConversation } from "./interfaces";
+import { ApplicationModel } from "./models/Application";
+import { dataPersister } from "./rabbitListeners";
 
 const initApp = async () => {
   await config({
     port: 3001,
     sentryKey: "",
     rabbitParams: {
-      dsn: "",
+      dsn: "amqp://guest:guest@localhost:5672",
       exchange: "eduzz",
       exchangeType: "topic",
-      connectionName: "jobzz.chat.service",
+      connectionName: "mercurius.data.persister",
     },
     mongoParams: {
-      mongoDatabase: "jobzz-chat",
-      mongoUrl: ""
-    }
+      mongoDatabase: "Mercurius",
+      mongoUrl: "mongodb://root:root@localhost:27017/"
+    },
+    redisUrl: 'redis://localhost:6379'
   });
 
-  const ConversationModel = model('Conversation', new Schema({ room: String, message: { from: String, content: String } }));
+  const io = getIoConnection();
 
-  listenRabbitTopic({
-      queue: "jobzz.chat.service",
-      topic: "jobzz.chat.service",
-    }, async (payload: IConversation) => {
-      console.log('PERSISTING THIS: ', payload);
-      persistMessage({ ...payload }, ConversationModel);
+  const applications = await ApplicationModel.find();
 
-      return true;
+  io.use((socket, next) => {
+    const token = socket.handshake.query.token;
+
+    if (!Object.values(applications).filter((app) => app.token === token).length) {
+      return;
     }
-  );
+
+    next();
+  });
 
   listenWebsocket('join', async (socket: Socket, payload: IConversation) => {
     socket.join(payload.room);
-
-    const messages = await listMessages(payload, ConversationModel);
-
-    socket.emit('list-messages', messages);
   });
 
   listenWebsocket('send', (socket: Socket, payload: IConversation) => {
-    console.log('EMITTING THIS: ', payload);
     socket.to(payload.room).emit('receive', payload);
 
-    publishRabbitMessage('jobzz.chat.service', payload);
+    if (payload.persist) {
+      publishRabbitMessage('mercurius.data.persister', payload);
+    }
   });
+
+  dataPersister();
 };
 
 initApp();
